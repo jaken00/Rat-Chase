@@ -3,7 +3,8 @@ import pygame
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
- 
+
+
 # initialize pygame
 pygame.init()
 screen_size = (700, 500)
