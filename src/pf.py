@@ -15,3 +15,8 @@ class Platform:
     def draw(self, screen):
         screen.blit(self.image, self.rect)
         self.is_drawn = True
+        
+    def move(self, worldShift):
+        self.y += worldShift
+        self.rect.y = self.y
+    
