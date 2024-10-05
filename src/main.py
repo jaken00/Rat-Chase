@@ -41,8 +41,14 @@ world_shift = 0
 
 def generate_platforms():
     if(len(platforms) < 7):
-        x = random.uniform(100, (SCREEN_WIDTH - 100))
-        y = random.uniform((player.y - 100), (player.y - 50))
+        
+        last_platform = platforms[-1]
+        
+        last_platform_x = last_platform.rect.x
+        last_platform_y = last_platform.rect.y
+        
+        x = random.uniform(SCREEN_WIDTH - 700, (SCREEN_WIDTH - 200)) 
+        y = random.uniform((last_platform_y - 50), (last_platform_y - 200))
         platforms.append(Platform(x,y,'lundumGame/platform_image.png'))
     
 
@@ -113,6 +119,9 @@ while running:
     if player.velocity_y < 0:
         score += round(player.velocity_y * -1)
     
+    if player.rect.x > SCREEN_WIDTH - player.rect.width or player.rect.x < 0:
+        print("HERE FIX THIS")
+
     screen.blit(backgroundImage, (0,0))
 
     for platform in platforms:
