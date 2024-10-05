@@ -7,7 +7,7 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 
-GRAVITY = 0.0
+GRAVITY = 0.1
 
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 900
@@ -26,13 +26,15 @@ def generate_platforms():
 
 def check_platform_collision():
     for platform in platforms:
-        if (player.y == platform.rect.y and
+        if ((player.y + 60) >= platform.rect.y - platform.rect.height and
+            (player.y + 60) <= platform.rect.y - platform.rect.height + 5 and
             player.x > platform.rect.x and
             player.x < platform.rect.x + platform.rect.width):
-            print("collision!")
             if player.velocity_y > 0:
+                print("collision!")
         #collision with platform
-                player.velocity_y = player.velocity_y - 2
+                player.y - 5
+                player.velocity_y = -5
 
 
     
@@ -81,6 +83,9 @@ while running:
     check_platform_collision()
 
     platforms.append(Platform(300, 800, 'platform_image.png'))
+    platforms.append(Platform(0, 700, 'platform_image.png'))
+    platforms.append(Platform(150, 600, 'platform_image.png'))
+    platforms.append(Platform(400, 500, 'platform_image.png'))
     
     player.handleKeys()
     player.tick_gravity(GRAVITY)

@@ -11,6 +11,7 @@ class Player:
         
         #rather than hard setting rect values, using rect vales for W+H as the image rect
         self.image = pygame.image.load(imagePath)
+        self.image = pygame.transform.scale(self.image, (90, 90))
         self.rect = self.image.get_rect()
         
         #pygame.transform.scale_by()
