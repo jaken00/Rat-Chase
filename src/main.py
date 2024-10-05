@@ -11,6 +11,10 @@ GRAVITY = 0.1
 
 score = 0
 
+
+
+
+
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 900
 
