@@ -119,9 +119,15 @@ while running:
     if player.velocity_y < 0:
         score += round(player.velocity_y * -1)
     
-    if player.rect.x > SCREEN_WIDTH - player.rect.width or player.rect.x < 0:
-        print("HERE FIX THIS")
-
+    
+    #velocity x = 0
+    
+    if player.rect.x > SCREEN_WIDTH:
+        player.rect.x = 0
+        
+    if player.rect.x < 0:
+        player.rect.x = SCREEN_WIDTH - player.rect.width
+        
     screen.blit(backgroundImage, (0,0))
 
     for platform in platforms:
