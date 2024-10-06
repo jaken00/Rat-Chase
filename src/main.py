@@ -14,8 +14,6 @@ from bullet import Bullet
 
 # DONE FIX HIGHSCORE // MORE SCOPING
 # DONE WORLD SPEED BASED OFF OF PLAYER POSITION (MULTIPLYER)
-# TODO JUMP SOUND - ZAN 
-# TODO OST - ZAN
 # DONE SPAWN PROTECTION - JAKE
 # TODO put names in game and thank play testers
 # DONE CAT ADDED PORPOTIONATE TO TIME INCLUDING SHIELDS/POWERUP
@@ -54,6 +52,8 @@ MAIN_MENU_BUTTON = resource_path('assets/main_menu_button.png')
 BG_DEAD_PATH = resource_path('assets/bgdead.png')
 DEAD_WINDOW_PATH = resource_path('assets/dead_window.png')
 BULLET_IMAGE_PATH = resource_path('assets/bullet.png')
+OST1_SONG = resource_path('assets/ost1.wav')
+SOUND_JUMP_PATH = resource_path('assets/jump.wav')
 
 
 menuScene = SceneBuilder(MENU_BACKGROUND_IMAGE)
@@ -152,6 +152,7 @@ def check_platform_collision():
                 if ((player.x > platform.rect.x and player.x < platform.rect.x + platform.rect.width) or
                     ((player.x + 90)> platform.rect.x and (player.x + 90) < platform.rect.x + platform.rect.width)):
                     if player.velocity_y > 0:
+                        pygame.mixer.Sound.play(jump)
                             #print("collision!")
                         #collision with platform
                         player.y - 5
@@ -189,6 +190,10 @@ start_time = pygame.time.get_ticks()
 #initialize audio mixer and audio files
 pygame.mixer.init()
 item_get_sound = pygame.mixer.Sound(SOUND_ITEM_PATH)
+ost1 = pygame.mixer.music.load(OST1_SONG)
+jump = pygame.mixer.Sound(SOUND_JUMP_PATH)
+
+pygame.mixer.music.play(-1)
 
 screen_size = (SCREEN_WIDTH, SCREEN_HEIGHT)
 
