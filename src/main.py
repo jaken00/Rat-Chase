@@ -7,7 +7,18 @@ from enemy import Enemy
 from item import Item
 from scenebuilder import SceneBuilder
 import sys
+import os
 
+
+# TODO FIX HIGHSCORE
+# TODO WORLD SPEED BASED OFF OF PLAYER POSITION (MULTIPLYER)
+# TODO JUMP SOUND
+# TODO SPAWN PROTECTION
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
 
 # CONSTANTS
 
@@ -17,22 +28,22 @@ RED = (255, 0, 0)
 
 GRAVITY = 0.1
 
-PLATFORM_PATH = 'assets/platform2_image.png'
-SMALL_PLATFORM_PATH = 'assets/small_platform_image.png'
-MEDIUM_PLATFORM_PATH = 'assets/medium_platform_image.png'
-MOUSE_PATH = 'assets/rat.png'
-KITTY_PATH = 'assets/flyingkitty.png'
-BG_PATH = 'assets/tilesetOpenGameBackground.png'
-BG2_PATH = 'assets/bg3.png'
-BG3_PATH = 'assets/bg2.png'
-ROCKET_TOOL_PATH = 'assets/rocket_boost_button.png'
-CHEESE_ITEM_PATH = 'assets/cheese.png'
-SOUND_ITEM_PATH = 'assets/boing.wav'
-MENU_BACKGROUND_IMAGE = 'assets/menu_background.png'
-MENU_PLAY_BUTTON = 'assets/play_button.png'
-MAIN_MENU_BUTTON = 'assets/main_menu_button.png'
-BG_DEAD_PATH = 'assets/bgdead.png'
-DEAD_WINDOW_PATH = 'assets/dead_window.png'
+PLATFORM_PATH = resource_path('assets/platform2_image.png')
+SMALL_PLATFORM_PATH = resource_path('assets/small_platform_image.png')
+MEDIUM_PLATFORM_PATH = resource_path('assets/medium_platform_image.png')
+MOUSE_PATH = resource_path('assets/rat.png')
+KITTY_PATH = resource_path('assets/flyingkitty.png')
+BG_PATH = resource_path('assets/tilesetOpenGameBackground.png')
+BG2_PATH = resource_path('assets/bg3.png')
+BG3_PATH = resource_path('assets/bg2.png')
+ROCKET_TOOL_PATH = resource_path('assets/rocket_boost_button.png')
+CHEESE_ITEM_PATH = resource_path('assets/cheese.png')
+SOUND_ITEM_PATH = resource_path('assets/boing.wav')
+MENU_BACKGROUND_IMAGE = resource_path('assets/menu_background.png')
+MENU_PLAY_BUTTON = resource_path('assets/play_button.png')
+MAIN_MENU_BUTTON = resource_path('assets/main_menu_button.png')
+BG_DEAD_PATH = resource_path('assets/bgdead.png')
+DEAD_WINDOW_PATH = resource_path('assets/dead_window.png')
 
 
 menuScene = SceneBuilder(MENU_BACKGROUND_IMAGE)
@@ -144,7 +155,7 @@ world_shift = 0
 pygame.init()
 start_time = pygame.time.get_ticks()
 #initialize the fonts
-NEWCHEESE_FONT = pygame.font.Font('assets/newcheese.ttf', 25)
+#NEWCHEESE_FONT = pygame.font.Font('assets/newcheese.ttf', 25)
 
 #initialize audio mixer and audio files
 pygame.mixer.init()
@@ -231,8 +242,8 @@ while running:
 
     elif currentScene == deadScene:
         mouse_position = pygame.mouse.get_pos()
-        dscore_surface = NEWCHEESE_FONT.render(f'Score : {score}', True, WHITE)
-        dtime_surface = NEWCHEESE_FONT.render(f'Time survived: {minutes}:{seconds:02d}', True, WHITE)
+        dscore_surface = GAME_FONT.render(f'Score : {score}', True, WHITE)
+        dtime_surface = GAME_FONT.render(f'Time survived: {minutes}:{seconds:02d}', True, WHITE)
         dscore_surface_rect = dscore_surface.get_rect(center = (SCREEN_WIDTH // 2, 430))
         dtime_surface_rect = dtime_surface.get_rect(center = (SCREEN_WIDTH // 2, 470))
         screen.blit(dead_background, (0,0))
@@ -337,7 +348,7 @@ while running:
         text_surface = GAME_FONT.render(f'Velocity Y: {player.velocity_y:.2f}', True, WHITE)
         text_surface2 = GAME_FONT.render(f'World Shift : {world_shift}', True, WHITE)
         text_surface3 = GAME_FONT.render(f'Platform Count : {len(platforms)}', True, WHITE)
-        score_surface = NEWCHEESE_FONT.render(f'Score : {score}', True, WHITE)
+        score_surface = GAME_FONT.render(f'Score : {score}', True, WHITE)
         enemy_surface = GAME_FONT.render(f'Enemy : {len(currentEnemies)}', True, WHITE)
         highscore_surface = GAME_FONT.render(f'High Score : {highscore}', True, WHITE)
         time_surface = GAME_FONT.render(f'Play Time: {minutes}:{seconds:02d}', True, WHITE)
