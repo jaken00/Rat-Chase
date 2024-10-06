@@ -48,7 +48,7 @@ PLATFORM_MAX_WIDTH = 200
 PLATFORM_HEIGHT = 20
 
 
-score = 0
+#gloscore = 0
 platforms = []
 items = []
 cheese_collected = 0
@@ -95,7 +95,7 @@ def generate_platforms():
         elif(rand > 20) and (rand < 30):
              moving_platform = Platform(x,y,SMALL_PLATFORM_PATH)
              moving_platform.moving = True
-             moving_platform.speed = 1
+             moving_platform.speed = 1 
              platforms.append(moving_platform)
              print("spawned moving platform!")
         else:
@@ -103,6 +103,7 @@ def generate_platforms():
 
         
 def generate_items():
+    
     while len(items) < 1:
         last_platform = platforms[-1]
         last_platform_x = last_platform.rect.x
@@ -128,10 +129,12 @@ def check_platform_collision():
                         player.velocity_y = -5
 
 def check_item_collision():
+    global score
     for i in range(0,len(items)):
         if player.rect.colliderect(items[i].rect):
             if items[i].type == "cheese":
                 items.pop(i)
+                score += 200
                 pygame.mixer.Sound.play(item_get_sound)
 
         
@@ -142,7 +145,7 @@ def check_item_collision():
 
 # initialize pygame
 pygame.init()
-
+start_time = pygame.time.get_ticks()
 #initialize the fonts
 NEWCHEESE_FONT = pygame.font.Font('assets/newcheese.ttf', 25)
 
@@ -169,6 +172,8 @@ slot_height = 90
 slot_margin = 10
 toolbar_x, toolbar_y = 20, 20
 toolbar = []
+
+highscore = 0
 
 GAME_FONT = pygame.font.Font(None, 30)
 backgroundImage = pygame.image.load(BG2_PATH)
@@ -200,9 +205,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
     if currentScene == menuScene:
-        
-        
-        
+
         screen.blit(menu_background, (0,0))
         screen.blit(play_button, (214,600))
         keys = pygame.key.get_pressed()
@@ -215,6 +218,10 @@ while running:
             if play_button_rect.collidepoint(mouse_position):
                 # reset map
                 score = 0
+                elapsed_time = 0
+                minutes = 0
+                seconds = 0
+                start_time = pygame.time.get_ticks()
                 player.rect.x = 350
                 player.x = 350
                 player.rect.y = 500
@@ -258,20 +265,23 @@ while running:
         #player.rect.y = MAX_PLAYER_HEIGHT # Keep player at center until the world shift is reset at end of frame
 
         
-        if checkEnemyCollision():
-            #running = False
-            print("WE COLLIDED")
+       
 
         #Scoring 
 
         if player.velocity_y < 0:
             score += round(player.velocity_y * -1)
         
-        #Player death
+        #PLAYER DEATH
 
         if(player.rect.y > 900):
+            lastScore = score
+            if lastScore > highscore:
+                highscore = lastScore
             currentScene = deadScene
         
+        if checkEnemyCollision():
+            currentScene = deadScene
         #velocity x = 0
         
         #screen side teleport
@@ -295,7 +305,7 @@ while running:
         #x-moving platforms
         for platform in platforms:
             if(platform.moving == True):
-                platform.move_x(platform.speed)
+                platform.move_x(platform.speed) # TODO: change speed if hitting wall to negative
 
         platforms = [platform for platform in platforms if platform.rect.y < SCREEN_HEIGHT]
         items = [item for item in items if item.rect.y < SCREEN_HEIGHT]
@@ -316,16 +326,27 @@ while running:
             enemy.move()
             
         
+        elapsed_time = (pygame.time.get_ticks() - start_time) // 1000
+        minutes = elapsed_time // 60
+        seconds = elapsed_time % 60
+        
+        
+        
         player.draw(screen)
         text_surface = GAME_FONT.render(f'Velocity Y: {player.velocity_y:.2f}', True, WHITE)
         text_surface2 = GAME_FONT.render(f'World Shift : {world_shift}', True, WHITE)
         text_surface3 = GAME_FONT.render(f'Platform Count : {len(platforms)}', True, WHITE)
         score_surface = NEWCHEESE_FONT.render(f'Score : {score}', True, WHITE)
         enemy_surface = GAME_FONT.render(f'Enemy : {len(currentEnemies)}', True, WHITE)
+        highscore_surface = GAME_FONT.render(f'High Score : {highscore}', True, WHITE)
+        time_surface = GAME_FONT.render(f'Play Time: {minutes}:{seconds:02d}', True, WHITE)
+        
         screen.blit(text_surface, (10, 10))
         screen.blit(text_surface2, (10, 50))
         screen.blit(text_surface3, (10, 90))
         screen.blit(score_surface, (400, 10))
+        screen.blit(highscore_surface, (400, 50))
+        screen.blit(time_surface, (400, 90))
         screen.blit(enemy_surface, (600, 10))
 
 
