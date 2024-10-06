@@ -4,6 +4,8 @@ class Platform:
     def __init__(self, x, y, imagePath):
         self.x = x
         self.y = y
+        self.speed = 0
+        self.moving = False
         self.is_drawn = False
         self.image = pygame.image.load(imagePath)
         self.rect = self.image.get_rect()
@@ -19,4 +21,8 @@ class Platform:
     def move(self, worldShift):
         self.y += worldShift
         self.rect.y = self.y
+
+    def move_x(self, speed):
+        self.x += speed
+        self.rect.x = self.x
     
