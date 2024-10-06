@@ -9,6 +9,8 @@ from scenebuilder import SceneBuilder
 import sys
 
 
+# CONSTANTS
+
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -47,13 +49,13 @@ PLATFORM_MIN_WIDTH = 100
 PLATFORM_MAX_WIDTH = 200
 PLATFORM_HEIGHT = 20
 
-
-#gloscore = 0
+#ARRAY INITS
 platforms = []
 items = []
 cheese_collected = 0
 currentEnemies = []
 
+#ENEMY COLLISION CHECK
 def checkEnemyCollision():
     for enemy in currentEnemies:
         if player.rect.colliderect(enemy.rect):
@@ -61,7 +63,7 @@ def checkEnemyCollision():
             return True
     return False
 
-
+#ENEMY GENERATION
 def generateEnemies():
     if(len(currentEnemies) < 4):
         currentEnemies.append(Enemy(KITTY_PATH))
@@ -75,7 +77,6 @@ def load_image(image_path):
         sys.exit
 
 
-world_shift = 0
 
 def generate_platforms():
     if(len(platforms) < 7):
@@ -136,12 +137,8 @@ def check_item_collision():
                 items.pop(i)
                 score += 200
                 pygame.mixer.Sound.play(item_get_sound)
-
-        
-
-
     
-
+world_shift = 0
 
 # initialize pygame
 pygame.init()
@@ -189,8 +186,7 @@ play_button_rect = play_button.get_rect()
 play_button_rect.x, play_button_rect.y, = 214,600
 
 main_menu_button = pygame.image.load(MAIN_MENU_BUTTON)
-main_menu_button_rect = main_menu_button.get_rect()
-main_menu_button_rect.x, main_menu_button_rect.y, = 208,530
+main_menu_button_rect = main_menu_button.get_rect(center = (SCREEN_WIDTH // 2, 530))
 
 dead_window = pygame.image.load(DEAD_WINDOW_PATH)
 dead_window_rect = dead_window.get_rect()
@@ -235,10 +231,15 @@ while running:
 
     elif currentScene == deadScene:
         mouse_position = pygame.mouse.get_pos()
-
+        dscore_surface = NEWCHEESE_FONT.render(f'Score : {score}', True, WHITE)
+        dtime_surface = NEWCHEESE_FONT.render(f'Time survived: {minutes}:{seconds:02d}', True, WHITE)
+        dscore_surface_rect = dscore_surface.get_rect(center = (SCREEN_WIDTH // 2, 430))
+        dtime_surface_rect = dtime_surface.get_rect(center = (SCREEN_WIDTH // 2, 470))
         screen.blit(dead_background, (0,0))
         screen.blit(dead_window, (50,200))
-        screen.blit(main_menu_button, (208,530))
+        screen.blit(main_menu_button, main_menu_button_rect)
+        screen.blit(dscore_surface, dscore_surface_rect)
+        screen.blit(dtime_surface, dtime_surface_rect)
         pygame.display.flip()
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if main_menu_button_rect.collidepoint(mouse_position):
@@ -264,11 +265,7 @@ while running:
         world_shift += 1.5 # Shift the world down by the speed
         #player.rect.y = MAX_PLAYER_HEIGHT # Keep player at center until the world shift is reset at end of frame
 
-        
-       
-
         #Scoring 
-
         if player.velocity_y < 0:
             score += round(player.velocity_y * -1)
         
@@ -306,6 +303,10 @@ while running:
         for platform in platforms:
             if(platform.moving == True):
                 platform.move_x(platform.speed) # TODO: change speed if hitting wall to negative
+                if platform.rect.x > SCREEN_WIDTH - platform.rect.width:
+                    platform.speed = -1
+                elif platform.rect.x < 0 + platform.rect.width:
+                    platform.speed = 1
 
         platforms = [platform for platform in platforms if platform.rect.y < SCREEN_HEIGHT]
         items = [item for item in items if item.rect.y < SCREEN_HEIGHT]
