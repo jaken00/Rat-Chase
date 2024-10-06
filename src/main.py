@@ -12,16 +12,6 @@ from bullet import Bullet
 
 #pyinstaller main.spec to reload EXE
 
-# DONE FIX HIGHSCORE // MORE SCOPING
-# DONE WORLD SPEED BASED OFF OF PLAYER POSITION (MULTIPLYER)
-# DONE SPAWN PROTECTION - JAKE
-# TODO put names in game and thank play testers
-# DONE CAT ADDED PORPOTIONATE TO TIME INCLUDING SHIELDS/POWERUP
-# TODO VERTICAL CAT SLOWLY AFTER 1 MIN 
-# DONE WORLD SHIFT > 1.5 MAKE SPAWN OF ENEMY HIGHER // CAP OUT VELO??
-# DONE HAVE BULLET SPAWN AT CURRENT PLAYER X
-# DONE CHEESE = AMMO
-
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
@@ -153,8 +143,6 @@ def check_platform_collision():
                     ((player.x + 90)> platform.rect.x and (player.x + 90) < platform.rect.x + platform.rect.width)):
                     if player.velocity_y > 0:
                         pygame.mixer.Sound.play(jump)
-                            #print("collision!")
-                        #collision with platform
                         player.y - 5
                         player.velocity_y = -5
 
@@ -184,8 +172,6 @@ world_shift = 0
 # initialize pygame
 pygame.init()
 start_time = pygame.time.get_ticks()
-#initialize the fonts
-#NEWCHEESE_FONT = pygame.font.Font('assets/newcheese.ttf', 25)
 
 #initialize audio mixer and audio files
 pygame.mixer.init()
@@ -237,9 +223,9 @@ dead_window = pygame.image.load(DEAD_WINDOW_PATH)
 dead_window_rect = dead_window.get_rect()
 dead_window_rect.x, dead_window_rect.y = 50,200
 
-#play_button = pygame.transform.scale(menu_background, (SCREEN_WIDTH, SCREEN_HEIGHT))
 last_cat_spawn_time = 0
 cat_spawn_interval = 15000
+space_pressed = False
 
 running = True
 while running:
@@ -249,15 +235,14 @@ while running:
             
     keys = pygame.key.get_pressed()
     if currentScene == menuScene:
+        
+        author_text_surface = GAME_FONT.render('Created by Zan D and Jacob N', True, BLACK)
 
         screen.blit(menu_background, (0,0))
         screen.blit(play_button, (214,600))
-        #keys = pygame.key.get_pressed()
+        screen.blit(author_text_surface, (170, 700))
         pygame.display.flip()
         mouse_position = pygame.mouse.get_pos()
-        # if play_button_rect.collidepoint(mouse_position):
-            # MOUSE HOVER BROKEN
-             #play_button.fill((1, 1, 1), special_flags=pygame.BLEND_RGB_ADD) 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if play_button_rect.collidepoint(mouse_position):
                 # reset map
@@ -265,6 +250,7 @@ while running:
                 elapsed_time = 0
                 minutes = 0
                 seconds = 0
+                bullet_count = 0
                 start_time = pygame.time.get_ticks()
                 player.rect.x = 350
                 player.x = 350
@@ -277,7 +263,6 @@ while running:
                 currentEnemies = []
                 currentScene = gameScene
         #DRAW BUTTONS
-
     elif currentScene == deadScene:
         mouse_position = pygame.mouse.get_pos()
         dscore_surface = GAME_FONT.render(f'Score : {score}', True, WHITE)
@@ -294,7 +279,6 @@ while running:
             if main_menu_button_rect.collidepoint(mouse_position):
                 print("COLLIDE WORKING")
                 currentScene = menuScene
-        
 
     elif currentScene == gameScene:
         generate_platforms()
@@ -304,26 +288,21 @@ while running:
         check_item_collision()
         check_bullet_collision()
         
-        
-        
-        
-        if keys[pygame.K_SPACE] and bullet_count > 0:
-            print("BULLET SHOOT")
-            bullet_count -= 1
-            bullet = Bullet(BULLET_IMAGE_PATH, player.x, player.y)
-            bullets.append(bullet)
+        if keys[pygame.K_SPACE]:
+            if not space_pressed and bullet_count > 0:
+                print("BULLET SHOOT")
+                bullet_count -= 1
+                bullet = Bullet(BULLET_IMAGE_PATH, player.x, player.y)
+                bullets.append(bullet)
+                space_pressed = True
             
-        #print(platforms[1].y)
-        #print(len(platforms))
-        
-        
+        else:
+            space_pressed = False
+            
         player.handleKeys()
         player.tick_gravity(GRAVITY)
         player.move()
         
-         # Shift the world down by the speed
-        #player.rect.y = MAX_PLAYER_HEIGHT # Keep player at center until the world shift is reset at end of frame
-
         #Scoring 
         if player.velocity_y < 0:
             score += round(player.velocity_y * -1)
@@ -414,28 +393,18 @@ while running:
         
         
         player.draw(screen)
-        text_surface = GAME_FONT.render(f'Velocity Y: {player.velocity_y:.2f}', True, WHITE)
-        text_surface2 = GAME_FONT.render(f'World Shift : {world_shift}', True, WHITE)
-        text_surface3 = GAME_FONT.render(f'Platform Count : {len(platforms)}', True, WHITE)
         score_surface = GAME_FONT.render(f'Score : {score}', True, WHITE)
-        enemy_surface = GAME_FONT.render(f'Enemy : {len(currentEnemies)}', True, WHITE)
+        ammo_surface = GAME_FONT.render(f'Ammo : {bullet_count}, (Hit space to Shoot!)', True, WHITE)
         highscore_surface = GAME_FONT.render(f'High Score : {highscore}', True, WHITE)
         time_surface = GAME_FONT.render(f'Play Time: {minutes}:{seconds:02d}', True, WHITE)
         
-        screen.blit(text_surface, (10, 10))
-        screen.blit(text_surface2, (10, 50))
-        screen.blit(text_surface3, (10, 90))
         screen.blit(score_surface, (400, 10))
         screen.blit(highscore_surface, (400, 50))
         screen.blit(time_surface, (400, 90))
-        screen.blit(enemy_surface, (600, 10))
-
-
-        
+        screen.blit(ammo_surface, (10, 10))
 
         pygame.display.flip()
 
-        #world_shift = 0
         clock.tick(60)
 
 
