@@ -8,12 +8,21 @@ from item import Item
 from scenebuilder import SceneBuilder
 import sys
 import os
+from bullet import Bullet
 
+#pyinstaller main.spec to reload EXE
 
-# TODO FIX HIGHSCORE
-# TODO WORLD SPEED BASED OFF OF PLAYER POSITION (MULTIPLYER)
-# TODO JUMP SOUND
-# TODO SPAWN PROTECTION
+# TODO FIX HIGHSCORE // MORE SCOPING
+# DONE WORLD SPEED BASED OFF OF PLAYER POSITION (MULTIPLYER)
+# TODO JUMP SOUND - ZAN 
+# TODO OST - ZAN
+# TODO SPAWN PROTECTION - JAKE
+# TODO put names in game and thank play testers
+# TODO CAT ADDED PORPOTIONATE TO TIME INCLUDING SHIELDS/POWERUP
+# TODO VERTICAL CAT SLOWLY AFTER 1 MIN 
+# TODO WORLD SHIFT > 1.5 MAKE SPAWN OF ENEMY HIGHER // CAP OUT VELO??
+# TODO HAVE BULLET SPAWN AT CURRENT PLAYER X
+# DONE CHEESE = AMMO
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -44,6 +53,7 @@ MENU_PLAY_BUTTON = resource_path('assets/play_button.png')
 MAIN_MENU_BUTTON = resource_path('assets/main_menu_button.png')
 BG_DEAD_PATH = resource_path('assets/bgdead.png')
 DEAD_WINDOW_PATH = resource_path('assets/dead_window.png')
+BULLET_IMAGE_PATH = resource_path('assets/bullet.png')
 
 
 menuScene = SceneBuilder(MENU_BACKGROUND_IMAGE)
@@ -64,7 +74,9 @@ PLATFORM_HEIGHT = 20
 platforms = []
 items = []
 cheese_collected = 0
+bullet_count = 0
 currentEnemies = []
+bullets = []
 
 #ENEMY COLLISION CHECK
 def checkEnemyCollision():
@@ -142,11 +154,14 @@ def check_platform_collision():
 
 def check_item_collision():
     global score
+    global bullet_count
     for i in range(0,len(items)):
         if player.rect.colliderect(items[i].rect):
             if items[i].type == "cheese":
                 items.pop(i)
                 score += 200
+                bullet_count += 1
+                print(f'Bullet Count: {bullet_count}')
                 pygame.mixer.Sound.play(item_get_sound)
     
 world_shift = 0
@@ -211,11 +226,13 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+            
+    keys = pygame.key.get_pressed()
     if currentScene == menuScene:
 
         screen.blit(menu_background, (0,0))
         screen.blit(play_button, (214,600))
-        keys = pygame.key.get_pressed()
+        #keys = pygame.key.get_pressed()
         pygame.display.flip()
         mouse_position = pygame.mouse.get_pos()
         # if play_button_rect.collidepoint(mouse_position):
@@ -266,14 +283,22 @@ while running:
         check_item_collision()
         
         
+        
+        if keys[pygame.K_SPACE] and bullet_count > 0:
+            print("BULLET SHOOT")
+            bullet_count -= 1
+            bullet = Bullet(BULLET_IMAGE_PATH, player.x, player.y)
+            bullets.append(bullet)
+            
         #print(platforms[1].y)
         #print(len(platforms))
+        
         
         player.handleKeys()
         player.tick_gravity(GRAVITY)
         player.move()
         
-        world_shift += 1.5 # Shift the world down by the speed
+         # Shift the world down by the speed
         #player.rect.y = MAX_PLAYER_HEIGHT # Keep player at center until the world shift is reset at end of frame
 
         #Scoring 
@@ -303,25 +328,36 @@ while running:
             
         screen.blit(backgroundImage, (0,0))
 
+        if player.rect.y < SCREEN_HEIGHT / 2:
+            world_shift = 2
+        else:
+            world_shift = 1.5
 
         #world shifting
         for platform in platforms:
             platform.move(world_shift) 
         for item in items:
             item.move(world_shift)
-
+        for bullet in bullets:
+            bullet.move()
+        
         #x-moving platforms
         for platform in platforms:
             if(platform.moving == True):
-                platform.move_x(platform.speed) # TODO: change speed if hitting wall to negative
+                platform.move_x(platform.speed)
                 if platform.rect.x > SCREEN_WIDTH - platform.rect.width:
                     platform.speed = -1
                 elif platform.rect.x < 0 + platform.rect.width:
                     platform.speed = 1
 
         platforms = [platform for platform in platforms if platform.rect.y < SCREEN_HEIGHT]
+        bullets = [bullet for bullet in bullets if bullet.rect.y > 0]
         items = [item for item in items if item.rect.y < SCREEN_HEIGHT]
         currentEnemies = [enemy for enemy in currentEnemies if enemy.rect.y < SCREEN_HEIGHT]
+        
+        for bullet in bullets:
+            bullet.draw(screen)
+        
         
         for platform in platforms:
             platform.draw(screen)
@@ -366,7 +402,7 @@ while running:
 
         pygame.display.flip()
 
-        world_shift = 0
+        #world_shift = 0
         clock.tick(60)
 
 
