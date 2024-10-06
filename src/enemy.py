@@ -5,9 +5,9 @@ import random
 # Maybe make a base Entity class? Rather than having two seperate player and enemy classes?? 
 
 class Enemy:
-    def __init__(self, imagePath) -> None:
+    def __init__(self, imagePath, spawnYMIN, spawnYMAX) -> None:
         self.x = random.uniform(0, 600) # need to be dynamically created at top of screen // Maybe have it start at -10 to build velocity??
-        self.y =  random.uniform(-50, -200) # need to be dynamically created at top of screen
+        self.y =  random.uniform(spawnYMIN, spawnYMAX) # need to be dynamically created at top of screen
         self.velocity_y = 0
         self.velocity_x = 0
         self.speed = 5

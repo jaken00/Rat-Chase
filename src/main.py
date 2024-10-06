@@ -12,16 +12,16 @@ from bullet import Bullet
 
 #pyinstaller main.spec to reload EXE
 
-# TODO FIX HIGHSCORE // MORE SCOPING
+# DONE FIX HIGHSCORE // MORE SCOPING
 # DONE WORLD SPEED BASED OFF OF PLAYER POSITION (MULTIPLYER)
 # TODO JUMP SOUND - ZAN 
 # TODO OST - ZAN
-# TODO SPAWN PROTECTION - JAKE
+# DONE SPAWN PROTECTION - JAKE
 # TODO put names in game and thank play testers
-# TODO CAT ADDED PORPOTIONATE TO TIME INCLUDING SHIELDS/POWERUP
+# DONE CAT ADDED PORPOTIONATE TO TIME INCLUDING SHIELDS/POWERUP
 # TODO VERTICAL CAT SLOWLY AFTER 1 MIN 
-# TODO WORLD SHIFT > 1.5 MAKE SPAWN OF ENEMY HIGHER // CAP OUT VELO??
-# TODO HAVE BULLET SPAWN AT CURRENT PLAYER X
+# DONE WORLD SHIFT > 1.5 MAKE SPAWN OF ENEMY HIGHER // CAP OUT VELO??
+# DONE HAVE BULLET SPAWN AT CURRENT PLAYER X
 # DONE CHEESE = AMMO
 
 def resource_path(relative_path):
@@ -70,6 +70,8 @@ PLATFORM_MIN_WIDTH = 100
 PLATFORM_MAX_WIDTH = 200
 PLATFORM_HEIGHT = 20
 
+maxCatCount = 2
+
 #ARRAY INITS
 platforms = []
 items = []
@@ -88,8 +90,11 @@ def checkEnemyCollision():
 
 #ENEMY GENERATION
 def generateEnemies():
-    if(len(currentEnemies) < 4):
-        currentEnemies.append(Enemy(KITTY_PATH))
+    if(len(currentEnemies) < maxCatCount):
+        if world_shift > 1.5:
+            currentEnemies.append(Enemy(KITTY_PATH, -50, -200)) #Normalized Spawn for when below 2 speed 
+        else:
+            currentEnemies.append(Enemy(KITTY_PATH, -200, -400)) #Makes spawn higher
 
 def load_image(image_path):
     try:
@@ -163,7 +168,16 @@ def check_item_collision():
                 bullet_count += 1
                 print(f'Bullet Count: {bullet_count}')
                 pygame.mixer.Sound.play(item_get_sound)
-    
+                
+def check_bullet_collision():
+    for enemy in currentEnemies:
+        for bullet in bullets:
+            if bullet.rect.colliderect(enemy.rect):
+                print("Collision detected!")
+                bullets.remove(bullet)  
+                currentEnemies.remove(enemy)  
+                break  
+
 world_shift = 0
 
 # initialize pygame
@@ -219,7 +233,8 @@ dead_window_rect = dead_window.get_rect()
 dead_window_rect.x, dead_window_rect.y = 50,200
 
 #play_button = pygame.transform.scale(menu_background, (SCREEN_WIDTH, SCREEN_HEIGHT))
-
+last_cat_spawn_time = 0
+cat_spawn_interval = 15000
 
 running = True
 while running:
@@ -250,8 +265,9 @@ while running:
                 player.x = 350
                 player.rect.y = 500
                 player.y = 500
+                maxCatCount = 2
                 platforms = []
-                platforms.append(Platform(300, 800, PLATFORM_PATH))
+                platforms.append(Platform(300, 700, PLATFORM_PATH))
                 items = []
                 currentEnemies = []
                 currentScene = gameScene
@@ -281,6 +297,8 @@ while running:
         generate_items()
         check_platform_collision()
         check_item_collision()
+        check_bullet_collision()
+        
         
         
         
@@ -377,7 +395,17 @@ while running:
         elapsed_time = (pygame.time.get_ticks() - start_time) // 1000
         minutes = elapsed_time // 60
         seconds = elapsed_time % 60
+        currentTime = pygame.time.get_ticks()
         
+        if minutes > 0:
+            world_shift += (minutes * 0.5) 
+        if world_shift > 5:
+            world_shift = 5 
+        
+        if currentTime - last_cat_spawn_time > cat_spawn_interval:
+            print("adding cat!")
+            maxCatCount += 1
+            last_cat_spawn_time = currentTime
         
         
         player.draw(screen)
